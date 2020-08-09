@@ -1,7 +1,11 @@
 package com.silvaHiago.minhasFinancas.services.imple;
 
-import org.springframework.stereotype.Service;
+import java.util.Optional;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.silvaHiago.minhasFinancas.exceptions.ErroAutenticacao;
 import com.silvaHiago.minhasFinancas.exceptions.RegraNegocioException;
 import com.silvaHiago.minhasFinancas.model.entities.Usuario;
 import com.silvaHiago.minhasFinancas.model.repository.UsuarioRepository;
@@ -20,14 +24,27 @@ public class UsuarioServiceImp implements UsuarioService{
 
 	@Override
 	public Usuario autenticar(String email, String senha) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Optional<Usuario> user = repository.findByEmail(email);
+		
+		if(!user.isPresent()) {
+			throw new ErroAutenticacao("Email não cadastrado!");
+		}
+		
+		if(user.get().getSenha().equals(senha)) {
+			throw new ErroAutenticacao("Senha inválida!");
+		}
+		
+		return user.get();
 	}
 
 	@Override
+	@Transactional
 	public Usuario salvarUsuario(Usuario usuario) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		validarEmail(usuario.getEmail());
+		
+		return repository.save(usuario);
 	}
 
 	@Override
